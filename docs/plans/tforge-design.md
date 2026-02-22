@@ -1,3 +1,5 @@
+> **ARCHIVED:** This document has been superseded by `docs/spec/`. It is kept as a historical record and is no longer maintained. See `docs/spec/README.md` for the current specification.
+
 # tforge — Project Builder CLI
 
 ## Overview
