@@ -32,6 +32,54 @@ tforge new my-project
 - `llm/` — rig-core-based LLM invocation layer for Anthropic, OpenAI, Gemini, and Ollama in `--ai` mode
 - `embedded.rs` — rust-embed loader for bundled template manifests
 - `remote.rs` — remote template fetching, caching, and search
+- `toolcheck.rs` — validates required external tools declared by selected templates
+
+## Module Dependency Graph
+
+```
+cli.rs
+  → prompts.rs OR llm/
+    → registry.rs
+      → types.rs
+      → embedded.rs
+      → remote.rs
+    → resolver.rs
+    → engine.rs
+      → renderer.rs
+      → condition.rs
+      → executor.rs
+      → state.rs
+    → config.rs
+    → toolcheck.rs
+```
+
+## Key Runtime Types
+
+| Type | Module | Purpose |
+|------|--------|---------|
+| `TemplateManifest` | `types.rs` | Template metadata + dependencies + parameters + steps |
+| `TemplateInfo` | `types.rs` | Template identity and catalog metadata |
+| `Provider` | `types.rs` | Provider metadata enum (`bundled`, `git`, `command`) |
+| `Dependencies` | `types.rs` | Required tools + template dependencies |
+| `ParamDef` | `types.rs` | Prompt and parameter schema, including `when` |
+| `StepDef` | `types.rs` | Executable step schema (`type`, `command`, `check`, etc.) |
+| `Registry` | `registry.rs` | Runtime template catalog and search surface |
+| `Renderer` | `renderer.rs` | Variable rendering for step fields |
+| `Engine` | `engine.rs` | Pipeline orchestrator for ordered template execution |
+| `StepContext` | `executor.rs` | Per-step execution context (`project_dir`, `vars`) |
+| `PipelineState` | `state.rs` | Persisted progress/failure model for resume/status |
+| `TforgeConfig` | `config.rs` | Global user settings model |
+| `LlmConfig` | `config.rs` | LLM provider/model/auth endpoint settings |
+| `LlmRecipe` | `llm/mod.rs` | Parsed AI recipe output (`templates`, `parameters`) |
+| `RecipeSelection` | `prompts.rs` | Prompt-selected templates and shared variables |
+
+## Dependency Baseline
+
+- Core CLI/prompt/rendering: `clap`, `inquire`, `minijinja`, `toml`, `serde`, `serde_json`
+- Async/integration: `tokio`, `reqwest`, `rig-core`
+- Terminal UX: `indicatif`, `owo-colors`
+- Infrastructure/utilities: `rust-embed`, `dirs`, `keyring`, `thiserror`, `anyhow`
+- Test support: `assert_cmd`, `predicates`, `tempfile`
 
 ## Data Flow (`tforge new`)
 

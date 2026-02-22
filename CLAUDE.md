@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**tforge** — a Rust CLI tool that scaffolds multi-stack projects. Status: **pre-implementation**.
+**tforge** — a Rust CLI tool that scaffolds multi-stack projects. Status: **implemented (v0.1)**.
 
 See `docs/spec/README.md` for the full specification index.
 
