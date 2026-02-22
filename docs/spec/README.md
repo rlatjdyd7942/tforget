@@ -15,7 +15,3 @@
 - Update the relevant spec file whenever you change architecture, modules, or features.
 - Each file is self-contained — readable without cross-referencing other spec files.
 - When adding a new major topic area, create a new spec file and add it to this table.
-
-## Archived
-
-- `docs/plans/tforge-design.md` — original design document. Superseded by these spec files. Kept as historical record, not maintained.

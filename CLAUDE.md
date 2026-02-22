@@ -26,4 +26,4 @@ cargo run -- list                        # list templates
 ## Key References
 
 - `docs/spec/` — project specification (see README.md for index)
-- `docs/plans/tforge-implementation-plan.md` — 22 tasks across 10 phases (TDD approach)
+- `PLAN.md` — implementation plan and task status

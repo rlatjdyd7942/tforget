@@ -7,7 +7,7 @@
 Build a monolithic Rust CLI with a step-based pipeline execution engine. Templates are TOML manifests with provider metadata (`bundled`, `git`, `command`) and executable `[[steps]]`. Templates are composable via dependency declarations and conditional steps. LLM integration is pluggable and optional, with `rig-core` as the required invocation layer.
 
 **Full Specification:** `docs/spec/` (architecture, templates, features, project overview)
-**Implementation Plan:** `docs/plans/tforge-implementation-plan.md` (23 tasks, 11 phases, TDD approach)
+**Implementation Plan:** `PLAN.md` (23 tasks, 11 phases, TDD approach)
 
 ---
 
