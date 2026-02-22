@@ -17,6 +17,6 @@ Ship with:
 - CLI engine (pipeline, template resolution, dependency ordering)
 - Template system (all 3 providers, composability, conditions)
 - Bundled templates: flutter-app, axum-server, gcp-project, gcp-cloudsql, gcp-appengine, firebase-project, firebase-flutter
-- LLM integration (pluggable, optional)
+- LLM integration (pluggable, optional, invoked through rig-core)
 - TUI interactive prompts
 - Resume/state tracking

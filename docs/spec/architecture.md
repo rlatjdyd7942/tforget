@@ -26,7 +26,7 @@ tforge new my-project
 - `state.rs` — persists step completion to `.tforge-state.json` for `tforge resume`
 - `prompts.rs` — inquire-based interactive TUI
 - `config.rs` — `~/.config/tforge/config.toml` management
-- `llm/` — pluggable LLM providers (Anthropic, OpenAI, Gemini, Ollama) for `--ai` mode
+- `llm/` — rig-core-based LLM invocation layer for Anthropic, OpenAI, Gemini, and Ollama in `--ai` mode
 - `embedded.rs` — rust-embed for bundled templates
 
 ## Data Flow (`tforge new`)
@@ -37,6 +37,13 @@ tforge new my-project
 4. `resolver::resolve_order()` — topological sort
 5. `engine::run()` — for each template in order, for each step: render variables → check condition → check idempotency → execute
 6. Track state in `.tforge-state.json`
+
+## LLM Runtime Constraints
+
+- `llm::query`/`llm::query_llm` must use `rig-core` provider clients as the only inference execution path.
+- Provider-specific raw HTTP request code is not part of the target architecture.
+- `LlmConfig.endpoint` is applied as a rig client base URL override when configured.
+- LLM output contract remains JSON-only recipe output: `{"templates":[...],"parameters":{...}}`.
 
 ## Error Recovery
 

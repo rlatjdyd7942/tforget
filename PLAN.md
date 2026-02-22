@@ -4,10 +4,10 @@
 
 ## Overview
 
-Build a monolithic Rust CLI with a step-based pipeline execution engine. Templates are TOML manifests with three provider types (bundled, git, command). Composable via dependency declarations and conditional steps. LLM integration is pluggable and optional.
+Build a monolithic Rust CLI with a step-based pipeline execution engine. Templates are TOML manifests with three provider types (bundled, git, command). Composable via dependency declarations and conditional steps. LLM integration is pluggable and optional, with `rig-core` as the required invocation layer.
 
 **Full Specification:** `docs/spec/` (architecture, templates, features, project overview)
-**Implementation Plan:** `docs/plans/tforge-implementation-plan.md` (22 tasks, 10 phases, TDD approach)
+**Implementation Plan:** `docs/plans/tforge-implementation-plan.md` (23 tasks, 11 phases, TDD approach)
 
 ---
 
@@ -30,7 +30,7 @@ User Input → Recipe Resolution → Dependency Sort → Step Execution → Outp
 
 ```
 cli.rs (user input)
-  → prompts.rs OR llm/ (recipe selection)
+  → prompts.rs OR llm/ (rig-based recipe selection)
     → registry.rs (template discovery)
       → types.rs (manifest deserialization)
     → resolver.rs (topological sort)
@@ -75,9 +75,10 @@ toml = "0.8"         # Manifest parsing
 serde = "1"          # Serialization
 serde_json = "1"     # JSON for state & LLM
 
-# Async/HTTP
-reqwest = "0.12"     # HTTP client (rustls-tls)
+# Async/Integration
+reqwest = "0.12"     # HTTP client for non-LLM networking (e.g. registry/cache)
 tokio = "1"          # Async runtime
+rig-core = "0.31"    # Unified LLM provider invocation layer
 
 # UI
 indicatif = "0.17"   # Progress bars/spinners
@@ -142,7 +143,13 @@ tempfile = "3"       # Temporary directories
 | # | Task | Files | Status |
 |---|------|-------|--------|
 | 13 | Config management | `src/config.rs`, `tests/config_test.rs` | ✅ Done |
-| 14 | LLM provider abstraction | `src/llm/mod.rs`, `src/llm/anthropic.rs`, `src/llm/openai.rs`, `tests/llm_test.rs` | ✅ Done |
+| 14 | Initial LLM provider abstraction | `src/llm/mod.rs`, `src/llm/anthropic.rs`, `src/llm/openai.rs`, `tests/llm_test.rs` | ✅ Done |
+
+### Phase 6B: LLM Rig Consolidation
+
+| # | Task | Files | Status |
+|---|------|-------|--------|
+| 23 | Migrate all LLM invocation paths to rig-core for Anthropic/OpenAI/Gemini/Ollama | `src/llm/mod.rs`, `src/llm/anthropic.rs`, `src/llm/openai.rs`, `tests/llm_test.rs`, `docs/spec/features.md`, `docs/spec/architecture.md` | ⬜ Wave 2 |
 
 ### Phase 7: Wire Everything
 
@@ -180,6 +187,8 @@ tempfile = "3"       # Temporary directories
 
 All 19 tasks (2-14, 16-19) implemented with 39 passing tests.
 
+Rig-wide LLM invocation consolidation is tracked separately as Task 23 (Wave 2).
+
 **Modules implemented:**
 - `src/{types,cli,registry,renderer,resolver,condition,toolcheck,executor,engine,state,config,prompts}.rs`
 - `src/llm/{mod,anthropic,openai}.rs`
@@ -194,6 +203,7 @@ All 19 tasks (2-14, 16-19) implemented with 39 passing tests.
 | 20 | Embed bundled templates with rust-embed | Pending |
 | 21 | Remote registry fetching and template caching | Pending |
 | 22 | Error messages, help text, and README | Pending |
+| 23 | Migrate all LLM invocation paths to rig-core (spec-aligned) | Pending |
 
 ---
 
