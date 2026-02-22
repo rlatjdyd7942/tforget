@@ -1,0 +1,4 @@
+interface:
+  display_name: "Librarian"
+  short_description: "Find relevant specs and code for a task"
+  default_prompt: "Use $librarian to gather the exact docs and code locations needed for this task."

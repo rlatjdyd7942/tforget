@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec"
+  short_description: "Update specs and PLAN from requirements"
+  default_prompt: "Use the spec workflow to discover context, update specification docs, and sync PLAN.md with implementation links."

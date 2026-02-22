@@ -1,0 +1,4 @@
+interface:
+  display_name: "Develop"
+  short_description: "Implement PLAN tasks with context discovery"
+  default_prompt: "Use the develop workflow to execute PLAN.md tasks after gathering relevant repository context."

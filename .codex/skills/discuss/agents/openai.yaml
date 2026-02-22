@@ -1,0 +1,4 @@
+interface:
+  display_name: "Discuss"
+  short_description: "Discuss features with doc-grounded context"
+  default_prompt: "Use the discuss workflow to ground interactive design discussions in project docs and code context."

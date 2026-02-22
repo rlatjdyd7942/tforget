@@ -1,0 +1,4 @@
+interface:
+  display_name: "Figma Code Reader"
+  short_description: "Extract project-ready code from Figma nodes"
+  default_prompt: "Use $figma-code-reader to analyze this Figma node and return token-mapped React/Tailwind implementation guidance."

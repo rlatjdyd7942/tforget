@@ -12,7 +12,7 @@
 
 ## Phase 1: Project Foundation
 
-### Task 1: Initialize Rust project and dependencies
+### Task 1: Initialize Rust project and dependencies (done)
 
 **Files:**
 - Create: `Cargo.toml`
@@ -42,6 +42,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 reqwest = { version = "0.12", features = ["json", "rustls-tls", "stream"], default-features = false }
 tokio = { version = "1", features = ["rt", "macros", "process", "fs"] }
+rig-core = "0.31"
 indicatif = "0.17"
 owo-colors = "4"
 rust-embed = "8"
