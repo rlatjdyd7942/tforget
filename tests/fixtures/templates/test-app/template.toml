@@ -1,0 +1,12 @@
+[template]
+name = "test-app"
+description = "Test application"
+category = "mobile"
+provider = "command"
+
+[dependencies]
+required_tools = []
+
+[[steps]]
+type = "command"
+command = "echo hello"

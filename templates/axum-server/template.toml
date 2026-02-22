@@ -1,0 +1,34 @@
+[template]
+name = "axum-server"
+description = "Rust Axum web server with REST API skeleton"
+category = "backend"
+provider = "bundled"
+
+[dependencies]
+required_tools = ["cargo"]
+
+[parameters]
+port = { type = "string", prompt = "Default server port", default = "3000" }
+db = { type = "select", prompt = "Database", options = ["postgres", "sqlite", "none"], default = "postgres" }
+
+[[steps]]
+type = "command"
+command = "cargo init --name {{project_name}}-server"
+check = "test -f Cargo.toml"
+
+[[steps]]
+type = "command"
+command = "cargo add axum tokio serde serde_json tower-http"
+working_dir = "{{project_name}}-server"
+
+[[steps]]
+type = "command"
+command = "cargo add sqlx --features postgres,runtime-tokio-rustls"
+working_dir = "{{project_name}}-server"
+condition = "db == 'postgres'"
+
+[[steps]]
+type = "command"
+command = "cargo add sqlx --features sqlite,runtime-tokio-rustls"
+working_dir = "{{project_name}}-server"
+condition = "db == 'sqlite'"

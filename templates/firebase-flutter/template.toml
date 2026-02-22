@@ -1,0 +1,58 @@
+[template]
+name = "firebase-flutter"
+description = "Firebase integration for Flutter apps"
+category = "integration"
+provider = "command"
+
+[dependencies]
+required_tools = ["firebase", "flutterfire"]
+requires_templates = ["flutter-app", "firebase-project"]
+
+[parameters]
+services = { type = "multi-select", prompt = "Firebase services to integrate", options = ["crashlytics", "auth", "analytics", "firestore", "storage", "messaging"], default = ["crashlytics", "analytics"] }
+
+[[steps]]
+type = "command"
+command = "flutterfire configure --project={{gcp_project_id}}"
+working_dir = "{{project_name}}"
+
+[[steps]]
+type = "command"
+command = "flutter pub add firebase_core"
+working_dir = "{{project_name}}"
+
+[[steps]]
+type = "command"
+command = "flutter pub add firebase_crashlytics"
+working_dir = "{{project_name}}"
+condition = "services contains 'crashlytics'"
+
+[[steps]]
+type = "command"
+command = "flutter pub add firebase_auth"
+working_dir = "{{project_name}}"
+condition = "services contains 'auth'"
+
+[[steps]]
+type = "command"
+command = "flutter pub add firebase_analytics"
+working_dir = "{{project_name}}"
+condition = "services contains 'analytics'"
+
+[[steps]]
+type = "command"
+command = "flutter pub add cloud_firestore"
+working_dir = "{{project_name}}"
+condition = "services contains 'firestore'"
+
+[[steps]]
+type = "command"
+command = "flutter pub add firebase_storage"
+working_dir = "{{project_name}}"
+condition = "services contains 'storage'"
+
+[[steps]]
+type = "command"
+command = "flutter pub add firebase_messaging"
+working_dir = "{{project_name}}"
+condition = "services contains 'messaging'"

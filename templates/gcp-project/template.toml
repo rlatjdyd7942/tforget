@@ -1,0 +1,27 @@
+[template]
+name = "gcp-project"
+description = "Google Cloud Platform project setup"
+category = "cloud"
+provider = "command"
+
+[dependencies]
+required_tools = ["gcloud"]
+
+[parameters]
+gcp_project_id = { type = "string", prompt = "GCP Project ID" }
+region = { type = "select", prompt = "GCP Region", options = ["us-central1", "us-east1", "us-west1", "europe-west1", "asia-east1"], default = "us-central1" }
+billing_account = { type = "string", prompt = "Billing Account ID (optional)", default = "" }
+
+[[steps]]
+type = "command"
+command = "gcloud projects create {{gcp_project_id}} --name={{project_name}}"
+check = "gcloud projects describe {{gcp_project_id}} 2>/dev/null"
+
+[[steps]]
+type = "command"
+command = "gcloud config set project {{gcp_project_id}}"
+
+[[steps]]
+type = "command"
+command = "gcloud billing projects link {{gcp_project_id}} --billing-account={{billing_account}}"
+condition = "billing_account != ''"
