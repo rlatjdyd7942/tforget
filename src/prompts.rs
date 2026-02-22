@@ -1,5 +1,6 @@
+use crate::condition::evaluate_condition;
 use crate::registry::Registry;
-use crate::types::{ParamType, TemplateManifest};
+use crate::types::{ParamDef, ParamType, TemplateManifest};
 use anyhow::{Context, Result};
 use inquire::{Confirm, MultiSelect, Select, Text};
 use std::collections::HashMap;
@@ -7,6 +8,29 @@ use std::collections::HashMap;
 pub struct RecipeSelection {
     pub templates: Vec<TemplateManifest>,
     pub vars: HashMap<String, String>,
+}
+
+pub fn parameter_keys_in_prompt_order(template: &TemplateManifest) -> Vec<String> {
+    let mut keys: Vec<String> = template.parameters.keys().cloned().collect();
+    keys.sort();
+    keys
+}
+
+pub fn should_prompt_parameter(
+    template_name: &str,
+    param_key: &str,
+    param: &ParamDef,
+    vars: &HashMap<String, String>,
+) -> Result<bool> {
+    let Some(condition) = &param.when else {
+        return Ok(true);
+    };
+
+    evaluate_condition(condition, vars).with_context(|| {
+        format!(
+            "failed to evaluate prompt condition for template '{template_name}' parameter '{param_key}'"
+        )
+    })
 }
 
 pub fn prompt_recipe(registry: &Registry, project_name: &str) -> Result<RecipeSelection> {
@@ -84,8 +108,13 @@ pub fn prompt_recipe(registry: &Registry, project_name: &str) -> Result<RecipeSe
 
     // Step 3: Collect parameters for all selected templates
     for tmpl in &selected_templates {
-        for (key, param) in &tmpl.parameters {
-            if vars.contains_key(key) {
+        for key in parameter_keys_in_prompt_order(tmpl) {
+            if vars.contains_key(&key) {
+                continue;
+            }
+
+            let param = tmpl.parameters.get(&key).expect("parameter key must exist");
+            if !should_prompt_parameter(&tmpl.template.name, &key, param, &vars)? {
                 continue;
             }
 
@@ -123,7 +152,7 @@ pub fn prompt_recipe(registry: &Registry, project_name: &str) -> Result<RecipeSe
                 }
             };
 
-            vars.insert(key.clone(), value);
+            vars.insert(key, value);
         }
     }
 

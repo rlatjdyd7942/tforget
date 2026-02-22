@@ -1,5 +1,5 @@
 use crate::types::TemplateManifest;
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use std::collections::{HashMap, HashSet};
 
 pub fn resolve_order(templates: &[TemplateManifest]) -> Result<Vec<String>> {

@@ -33,5 +33,9 @@ fn test_registry_merge_deduplicates() {
     let reg2 = Registry::from_embedded().unwrap();
     let count_before = reg1.templates().len();
     reg1.merge(reg2);
-    assert_eq!(reg1.templates().len(), count_before, "merge should deduplicate");
+    assert_eq!(
+        reg1.templates().len(),
+        count_before,
+        "merge should deduplicate"
+    );
 }

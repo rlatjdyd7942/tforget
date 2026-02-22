@@ -1,5 +1,5 @@
 use crate::types::StepDef;
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Command;

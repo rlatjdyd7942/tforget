@@ -33,7 +33,7 @@ working_dir = "{{project_name}}"
 Key sections:
 - `[template]` — name, description, category, provider
 - `[dependencies]` — required_tools, requires_templates
-- `[parameters]` — user-configurable values (string, multi-select, with defaults)
+- `[parameters]` — user-configurable values (string, multi-select, with defaults) and optional prompt conditions
 - `[[steps]]` — ordered actions with optional `condition` and `check` fields
 
 ### Parameter Types
@@ -43,6 +43,15 @@ Supported parameter types:
 - `select`
 - `multi-select`
 - `bool`
+
+### Parameter Prompt Semantics
+
+- Parameter prompts are deterministic: keys are processed in ascending lexical order.
+- A parameter may define an optional `when` expression to conditionally show the prompt.
+- `when` uses the same expression grammar as step `condition` (`==`, `!=`, `contains`).
+- `when` expressions are evaluated against currently known variables (shared vars plus earlier prompted params).
+- If `when` evaluates to `false`, the parameter is skipped.
+- If `when` references an unknown variable, prompt resolution fails with a clear error.
 
 ## Step Types
 
@@ -103,6 +112,45 @@ working_dir = "{{project_name}}"
 ## Parameter Sharing
 
 Parameters set in one template (e.g., `gcp_project_id` in `gcp-project`) are automatically available to downstream templates that depend on it.
+
+## Bundled Template Contract: `gcp-appengine`
+
+`gcp-appengine` remains a cloud template that depends on `gcp-project`, and adds guided deployment configuration.
+
+Required parameter groups:
+
+- Common:
+  - `deploy_target` (`select`): `project-root`, `flutter-app`, `axum-server`, `custom-path`
+  - `deploy_target_path` (`string`, `when = "deploy_target == 'custom-path'"`)
+  - `appengine_environment` (`select`): `standard`, `flexible`
+  - `service` (`string`, default `default`)
+  - `version` (`string`, default `v1`)
+  - `deploy_now` (`bool`, default `false`)
+  - `promote_traffic` (`bool`, default `true`, `when = "deploy_now == 'true'"`)
+- Standard environment (`when = "appengine_environment == 'standard'"`):
+  - `runtime_standard` (`select`): `python312`, `nodejs20`, `go122`, `java21`
+  - `instance_class` (`select`): `F1`, `F2`, `F4`, `F4_1G`
+  - `standard_max_instances` (`string`)
+- Flexible environment (`when = "appengine_environment == 'flexible'"`):
+  - `runtime_flexible` (`select`): `python`, `nodejs`, `go`, `java`, `custom`
+  - `flex_cpu` (`string`)
+  - `flex_memory_gb` (`string`)
+  - `flex_min_instances` (`string`)
+  - `flex_max_instances` (`string`)
+
+Target directory resolution:
+
+- `project-root` → invocation directory
+- `flutter-app` → `{{project_name}}`
+- `axum-server` → `{{project_name}}-server`
+- `custom-path` → `{{deploy_target_path}}`
+
+Execution behavior:
+
+- Ensure App Engine API/service initialization is complete for `{{gcp_project_id}}`.
+- Generate/update `app.yaml` in the resolved target directory using selected environment settings.
+- If `deploy_now == 'true'`, run `gcloud app deploy` from the resolved target directory with selected service/version/promotion settings.
+- Steps remain idempotent through `check` commands where possible.
 
 ## Registry
 

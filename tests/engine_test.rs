@@ -1,7 +1,7 @@
-use tforge::engine::Engine;
-use tforge::types::TemplateManifest;
 use std::collections::HashMap;
 use tempfile::TempDir;
+use tforge::engine::Engine;
+use tforge::types::TemplateManifest;
 
 #[test]
 fn test_engine_runs_single_template() {
@@ -112,4 +112,81 @@ condition = "services contains 'b'"
 
     assert!(tmp.path().join("a.txt").exists());
     assert!(!tmp.path().join("b.txt").exists());
+}
+
+#[test]
+fn test_engine_maps_appengine_target_directory() {
+    let tmp = TempDir::new().unwrap();
+    let manifest: TemplateManifest = toml::from_str(
+        r#"
+[template]
+name = "appengine-target"
+description = "test"
+category = "cloud"
+provider = "command"
+[dependencies]
+
+[[steps]]
+type = "command"
+command = """
+TARGET_DIR="."
+if [ "{{deploy_target}}" = "flutter-app" ]; then
+  TARGET_DIR="{{project_name}}"
+elif [ "{{deploy_target}}" = "axum-server" ]; then
+  TARGET_DIR="{{project_name}}-server"
+elif [ "{{deploy_target}}" = "custom-path" ]; then
+  TARGET_DIR="{{deploy_target_path}}"
+fi
+mkdir -p "$TARGET_DIR"
+echo "runtime: python312" > "$TARGET_DIR/app.yaml"
+"""
+"#,
+    )
+    .unwrap();
+
+    let mut vars = HashMap::new();
+    vars.insert("project_name".into(), "demo".into());
+    vars.insert("deploy_target".into(), "axum-server".into());
+    vars.insert("deploy_target_path".into(), "custom/api".into());
+
+    let engine = Engine::new(tmp.path().to_path_buf());
+    engine.run(&[manifest], &vars).unwrap();
+
+    assert!(tmp.path().join("demo-server/app.yaml").exists());
+}
+
+#[test]
+fn test_engine_respects_deploy_profile_condition() {
+    let manifest: TemplateManifest = toml::from_str(
+        r#"
+[template]
+name = "appengine-deploy"
+description = "test"
+category = "cloud"
+provider = "command"
+[dependencies]
+
+[[steps]]
+type = "command"
+condition = "deploy_now == 'true'"
+command = "touch deployed.txt"
+"#,
+    )
+    .unwrap();
+
+    let tmp_false = TempDir::new().unwrap();
+    let mut vars_false = HashMap::new();
+    vars_false.insert("deploy_now".into(), "false".into());
+    Engine::new(tmp_false.path().to_path_buf())
+        .run(&[manifest.clone()], &vars_false)
+        .unwrap();
+    assert!(!tmp_false.path().join("deployed.txt").exists());
+
+    let tmp_true = TempDir::new().unwrap();
+    let mut vars_true = HashMap::new();
+    vars_true.insert("deploy_now".into(), "true".into());
+    Engine::new(tmp_true.path().to_path_buf())
+        .run(&[manifest], &vars_true)
+        .unwrap();
+    assert!(tmp_true.path().join("deployed.txt").exists());
 }

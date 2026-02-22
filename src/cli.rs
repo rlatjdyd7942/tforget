@@ -61,18 +61,14 @@ EXAMPLES:
     )]
     Resume,
     /// Show the current project's execution state
-    #[command(
-        long_about = "\
+    #[command(long_about = "\
 Display which templates and steps have been executed, failed, or are \
-pending. Reads from .tforge-state.json in the current directory."
-    )]
+pending. Reads from .tforge-state.json in the current directory.")]
     Status,
     /// List all available templates (bundled and installed)
-    #[command(
-        long_about = "\
+    #[command(long_about = "\
 Show all templates including bundled templates shipped with the binary \
-and community templates added via `tforge add`."
-    )]
+and community templates added via `tforge add`.")]
     List,
     /// Search the template registry by keyword
     #[command(
@@ -101,10 +97,8 @@ EXAMPLES:
         url: String,
     },
     /// Update cached community templates
-    #[command(
-        long_about = "\
-Fetch the latest version of cached community templates via git pull."
-    )]
+    #[command(long_about = "\
+Fetch the latest version of cached community templates via git pull.")]
     Update,
     /// Configure tforge settings
     #[command(

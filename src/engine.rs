@@ -117,11 +117,7 @@ impl Engine {
                         state.mark_failed(name, i, &msg);
                         save_state_if_needed(&state, state_path)?;
                         return Err(err).with_context(|| {
-                            format!(
-                                "[{name}] step {} ({}) failed",
-                                i + 1,
-                                step.step_type
-                            )
+                            format!("[{name}] step {} ({}) failed", i + 1, step.step_type)
                         });
                     }
                 }

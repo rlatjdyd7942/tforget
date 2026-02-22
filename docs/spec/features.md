@@ -20,6 +20,11 @@ tforge config reset          # reset config
 
 `inquire`-based interactive prompts handle template selection and parameter input in the default (non-AI) flow.
 
+Prompt behavior requirements:
+- Parameter prompts are deterministic (lexical key order within a template).
+- Parameters may be conditionally shown through manifest-level `when` expressions.
+- `when` expressions use the same condition grammar as step conditions.
+
 ## LLM Integration
 
 Optional. The tool works fully without it via TUI prompts.
@@ -54,6 +59,22 @@ All provider invocations go through `rig-core` as the single LLM invocation laye
 Cloud actions are templates — same system, same TOML manifests. No special cloud subsystem.
 
 Idempotency via step `check` fields ensures cloud resources aren't duplicated. See `architecture.md` for details.
+
+### App Engine Guided Configuration
+
+The `gcp-appengine` template must guide users through deployment-profile setup:
+
+1. Select deployment target (`project-root`, `flutter-app`, `axum-server`, or `custom-path`).
+2. Select App Engine environment (`standard` or `flexible`).
+3. Enter only settings relevant to the selected environment.
+4. Generate/update `app.yaml` in the selected target directory.
+5. Optionally deploy immediately (`gcloud app deploy`) when `deploy_now` is enabled.
+
+Acceptance criteria:
+- Standard-only settings are never prompted when `flexible` is selected.
+- Flexible-only settings are never prompted when `standard` is selected.
+- `custom-path` requires an explicit path prompt; non-custom targets do not.
+- Template execution uses the resolved target directory for file generation and deploy commands.
 
 ## Config Management
 

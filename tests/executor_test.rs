@@ -1,7 +1,7 @@
-use tforge::executor::{execute_step, StepContext};
-use tforge::types::StepDef;
 use std::collections::HashMap;
 use tempfile::TempDir;
+use tforge::executor::{StepContext, execute_step};
+use tforge::types::StepDef;
 
 fn make_command_step(cmd: &str) -> StepDef {
     toml::from_str(&format!(

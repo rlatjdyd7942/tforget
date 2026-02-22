@@ -61,10 +61,7 @@ fn test_chain_dependency() {
 
 #[test]
 fn test_circular_dependency_errors() {
-    let templates = vec![
-        make_manifest("a", vec!["b"]),
-        make_manifest("b", vec!["a"]),
-    ];
+    let templates = vec![make_manifest("a", vec!["b"]), make_manifest("b", vec!["a"])];
     let result = resolve_order(&templates);
     assert!(result.is_err());
 }

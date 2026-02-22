@@ -1,6 +1,6 @@
 [template]
 name = "gcp-appengine"
-description = "Google App Engine deployment configuration"
+description = "Google App Engine deployment profile"
 category = "cloud"
 provider = "command"
 
@@ -9,8 +9,28 @@ required_tools = ["gcloud"]
 requires_templates = ["gcp-project"]
 
 [parameters]
-runtime = { type = "select", prompt = "App Engine runtime", options = ["python312", "nodejs20", "go122", "java21"], default = "python312" }
+deploy_target = { type = "select", prompt = "Deploy target", options = ["project-root", "flutter-app", "axum-server", "custom-path"], default = "project-root" }
+deploy_target_path = { type = "string", prompt = "Custom deploy target path", default = ".", when = "deploy_target == 'custom-path'" }
+appengine_environment = { type = "select", prompt = "App Engine environment", options = ["standard", "flexible"], default = "standard" }
 service = { type = "string", prompt = "Service name", default = "default" }
+version = { type = "string", prompt = "Version label", default = "v1" }
+deploy_now = { type = "bool", prompt = "Deploy now with gcloud app deploy?", default = false }
+promote_traffic = { type = "bool", prompt = "Promote this version to all traffic?", default = true, when = "deploy_now == 'true'" }
+
+runtime_standard = { type = "select", prompt = "Standard runtime", options = ["python312", "nodejs20", "go122", "java21"], default = "python312", when = "appengine_environment == 'standard'" }
+instance_class = { type = "select", prompt = "Standard instance class", options = ["F1", "F2", "F4", "F4_1G"], default = "F1", when = "appengine_environment == 'standard'" }
+standard_max_instances = { type = "string", prompt = "Standard max instances", default = "5", when = "appengine_environment == 'standard'" }
+
+runtime_flexible = { type = "select", prompt = "Flexible runtime", options = ["python", "nodejs", "go", "java", "custom"], default = "python", when = "appengine_environment == 'flexible'" }
+flex_cpu = { type = "string", prompt = "Flexible CPU cores", default = "1", when = "appengine_environment == 'flexible'" }
+flex_memory_gb = { type = "string", prompt = "Flexible memory (GB)", default = "1.0", when = "appengine_environment == 'flexible'" }
+flex_min_instances = { type = "string", prompt = "Flexible min instances", default = "1", when = "appengine_environment == 'flexible'" }
+flex_max_instances = { type = "string", prompt = "Flexible max instances", default = "3", when = "appengine_environment == 'flexible'" }
+
+[[steps]]
+type = "command"
+command = "gcloud services enable appengine.googleapis.com --project={{gcp_project_id}}"
+check = "gcloud services list --enabled --project={{gcp_project_id}} --filter='config.name:appengine.googleapis.com' --format='value(config.name)' | grep -q appengine.googleapis.com"
 
 [[steps]]
 type = "command"
@@ -19,4 +39,77 @@ check = "gcloud app describe --project={{gcp_project_id}} 2>/dev/null"
 
 [[steps]]
 type = "command"
-command = "gcloud services enable appengine.googleapis.com --project={{gcp_project_id}}"
+condition = "appengine_environment == 'standard'"
+command = """
+TARGET_DIR="."
+if [ "{{deploy_target}}" = "flutter-app" ]; then
+  TARGET_DIR="{{project_name}}"
+elif [ "{{deploy_target}}" = "axum-server" ]; then
+  TARGET_DIR="{{project_name}}-server"
+elif [ "{{deploy_target}}" = "custom-path" ]; then
+  TARGET_DIR="{{deploy_target_path}}"
+fi
+
+mkdir -p "$TARGET_DIR"
+cat > "$TARGET_DIR/app.yaml" <<EOF
+runtime: {{runtime_standard}}
+env: standard
+service: {{service}}
+instance_class: {{instance_class}}
+automatic_scaling:
+  max_instances: {{standard_max_instances}}
+EOF
+"""
+
+[[steps]]
+type = "command"
+condition = "appengine_environment == 'flexible'"
+command = """
+TARGET_DIR="."
+if [ "{{deploy_target}}" = "flutter-app" ]; then
+  TARGET_DIR="{{project_name}}"
+elif [ "{{deploy_target}}" = "axum-server" ]; then
+  TARGET_DIR="{{project_name}}-server"
+elif [ "{{deploy_target}}" = "custom-path" ]; then
+  TARGET_DIR="{{deploy_target_path}}"
+fi
+
+mkdir -p "$TARGET_DIR"
+cat > "$TARGET_DIR/app.yaml" <<EOF
+runtime: {{runtime_flexible}}
+env: flex
+service: {{service}}
+resources:
+  cpu: {{flex_cpu}}
+  memory_gb: {{flex_memory_gb}}
+automatic_scaling:
+  min_num_instances: {{flex_min_instances}}
+  max_num_instances: {{flex_max_instances}}
+EOF
+"""
+
+[[steps]]
+type = "command"
+condition = "deploy_now == 'true'"
+command = """
+TARGET_DIR="."
+if [ "{{deploy_target}}" = "flutter-app" ]; then
+  TARGET_DIR="{{project_name}}"
+elif [ "{{deploy_target}}" = "axum-server" ]; then
+  TARGET_DIR="{{project_name}}-server"
+elif [ "{{deploy_target}}" = "custom-path" ]; then
+  TARGET_DIR="{{deploy_target_path}}"
+fi
+
+PROMOTE_FLAG="--no-promote"
+if [ "{{promote_traffic}}" = "true" ]; then
+  PROMOTE_FLAG="--promote"
+fi
+
+gcloud app deploy "$TARGET_DIR/app.yaml" \
+  --project={{gcp_project_id}} \
+  --service={{service}} \
+  --version={{version}} \
+  "$PROMOTE_FLAG" \
+  --quiet
+"""

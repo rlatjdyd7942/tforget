@@ -1,4 +1,4 @@
-use tforge::toolcheck::{check_tool, ToolStatus};
+use tforge::toolcheck::{ToolStatus, check_tool};
 
 #[test]
 fn test_check_existing_tool() {

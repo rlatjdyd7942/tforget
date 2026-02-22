@@ -1,5 +1,5 @@
-use tforge::state::{PipelineState, StepState};
 use tempfile::TempDir;
+use tforge::state::{PipelineState, StepState};
 
 #[test]
 fn test_save_and_load_state() {

@@ -52,10 +52,9 @@ pub fn build_system_prompt(registry: &Registry) -> String {
 }
 
 fn resolve_api_key(config: &LlmConfig) -> Result<String> {
-    let env_var = config
-        .api_key_env
-        .as_ref()
-        .ok_or_else(|| anyhow::anyhow!("API key env var not configured. Run `tforge config llm`."))?;
+    let env_var = config.api_key_env.as_ref().ok_or_else(|| {
+        anyhow::anyhow!("API key env var not configured. Run `tforge config llm`.")
+    })?;
     std::env::var(env_var)
         .with_context(|| format!("API key not found in environment variable '{env_var}'"))
 }
@@ -70,8 +69,9 @@ pub async fn query_llm(config: &LlmConfig, system: &str, user_msg: &str) -> Resu
             } else {
                 builder
             };
-            let client: rig::providers::anthropic::Client =
-                builder.build().context("failed to build Anthropic client")?;
+            let client: rig::providers::anthropic::Client = builder
+                .build()
+                .context("failed to build Anthropic client")?;
             let agent = client.agent(&config.model).preamble(system).build();
             agent
                 .prompt(user_msg)
@@ -80,15 +80,15 @@ pub async fn query_llm(config: &LlmConfig, system: &str, user_msg: &str) -> Resu
         }
         LlmProvider::Openai | LlmProvider::Gemini => {
             let api_key = resolve_api_key(config)?;
-            let builder =
-                rig::providers::openai::CompletionsClient::builder().api_key(api_key);
+            let builder = rig::providers::openai::CompletionsClient::builder().api_key(api_key);
             let builder = if let Some(endpoint) = &config.endpoint {
                 builder.base_url(endpoint)
             } else {
                 builder
             };
-            let client: rig::providers::openai::CompletionsClient =
-                builder.build().context("failed to build OpenAI-compatible client")?;
+            let client: rig::providers::openai::CompletionsClient = builder
+                .build()
+                .context("failed to build OpenAI-compatible client")?;
             let agent = client.agent(&config.model).preamble(system).build();
             agent
                 .prompt(user_msg)
@@ -96,8 +96,7 @@ pub async fn query_llm(config: &LlmConfig, system: &str, user_msg: &str) -> Resu
                 .context("OpenAI-compatible API call failed")
         }
         LlmProvider::Ollama => {
-            let builder =
-                rig::providers::ollama::Client::builder().api_key(rig::client::Nothing);
+            let builder = rig::providers::ollama::Client::builder().api_key(rig::client::Nothing);
             let builder = if let Some(endpoint) = &config.endpoint {
                 builder.base_url(endpoint)
             } else {

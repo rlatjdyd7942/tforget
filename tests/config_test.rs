@@ -1,5 +1,5 @@
-use tforge::config::{TforgeConfig, LlmConfig, LlmProvider};
 use tempfile::TempDir;
+use tforge::config::{LlmConfig, LlmProvider, TforgeConfig};
 
 #[test]
 fn test_default_config() {

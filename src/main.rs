@@ -411,8 +411,7 @@ fn load_registry() -> Result<Registry> {
     let progress = spinner("Loading template registry...");
 
     // Primary: embedded templates (bundled in binary)
-    let mut registry = Registry::from_embedded()
-        .context("failed to load embedded templates")?;
+    let mut registry = Registry::from_embedded().context("failed to load embedded templates")?;
 
     // Dev override: if local templates/ dir exists, merge those too
     let template_dir = Path::new(TEMPLATE_ROOT);

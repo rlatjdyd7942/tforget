@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use std::collections::HashMap;
 
 pub fn evaluate_condition(condition: &str, vars: &HashMap<String, String>) -> Result<bool> {

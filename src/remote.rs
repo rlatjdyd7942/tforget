@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use std::path::{Path, PathBuf};
 
 use crate::config::TforgeConfig;
@@ -129,10 +129,7 @@ pub fn list_cached_templates_in(cache: &Path) -> Result<Vec<TemplateManifest>> {
 }
 
 /// Search templates by name or description (case-insensitive partial match).
-pub fn search_templates<'a>(
-    registry: &'a Registry,
-    query: &str,
-) -> Vec<&'a TemplateManifest> {
+pub fn search_templates<'a>(registry: &'a Registry, query: &str) -> Vec<&'a TemplateManifest> {
     let query_lower = query.to_lowercase();
     registry
         .templates()

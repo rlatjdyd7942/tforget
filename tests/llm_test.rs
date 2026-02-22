@@ -13,7 +13,15 @@ fn test_parse_llm_recipe_response() {
     }"#;
 
     let recipe = parse_llm_recipe_response(json).unwrap();
-    assert_eq!(recipe.templates, vec!["flutter-app", "axum-server", "gcp-project", "firebase-flutter"]);
+    assert_eq!(
+        recipe.templates,
+        vec![
+            "flutter-app",
+            "axum-server",
+            "gcp-project",
+            "firebase-flutter"
+        ]
+    );
     assert_eq!(recipe.parameters.get("org").unwrap(), "com.example");
 }
 

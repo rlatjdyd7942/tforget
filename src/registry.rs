@@ -20,7 +20,11 @@ impl Registry {
     /// Merge another registry into this one. Deduplicates by template name.
     pub fn merge(&mut self, other: Registry) {
         for t in other.templates {
-            if !self.templates.iter().any(|e| e.template.name == t.template.name) {
+            if !self
+                .templates
+                .iter()
+                .any(|e| e.template.name == t.template.name)
+            {
                 self.templates.push(t);
             }
         }

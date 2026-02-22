@@ -45,6 +45,8 @@ pub struct ParamDef {
     pub default: Option<toml::Value>,
     #[serde(default)]
     pub options: Vec<String>,
+    #[serde(default)]
+    pub when: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Clone, PartialEq)]

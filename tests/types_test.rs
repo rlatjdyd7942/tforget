@@ -1,4 +1,4 @@
-use tforge::types::{TemplateManifest, Provider};
+use tforge::types::{Provider, TemplateManifest};
 
 #[test]
 fn test_deserialize_command_template() {
@@ -49,8 +49,39 @@ command = "flutter pub add firebase_crashlytics"
 condition = "services contains 'crashlytics'"
 "#;
     let manifest: TemplateManifest = toml::from_str(toml_str).unwrap();
-    assert_eq!(manifest.dependencies.requires_templates, vec!["flutter-app"]);
+    assert_eq!(
+        manifest.dependencies.requires_templates,
+        vec!["flutter-app"]
+    );
     assert!(manifest.steps[0].condition.is_some());
+}
+
+#[test]
+fn test_deserialize_parameter_when_condition() {
+    let toml_str = r#"
+[template]
+name = "gcp-appengine"
+description = "App Engine"
+category = "cloud"
+provider = "command"
+
+[dependencies]
+
+[parameters]
+appengine_environment = { type = "select", prompt = "Environment", options = ["standard", "flexible"], default = "standard" }
+runtime_standard = { type = "select", prompt = "Runtime", options = ["python312"], when = "appengine_environment == 'standard'" }
+
+[[steps]]
+type = "command"
+command = "echo ok"
+"#;
+
+    let manifest: TemplateManifest = toml::from_str(toml_str).unwrap();
+    let runtime_standard = manifest.parameters.get("runtime_standard").unwrap();
+    assert_eq!(
+        runtime_standard.when.as_deref(),
+        Some("appengine_environment == 'standard'")
+    );
 }
 
 #[test]

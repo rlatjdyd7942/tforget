@@ -1,5 +1,5 @@
-use tforge::condition::evaluate_condition;
 use std::collections::HashMap;
+use tforge::condition::evaluate_condition;
 
 #[test]
 fn test_contains_true() {
@@ -27,6 +27,13 @@ fn test_equals_false() {
     let mut vars = HashMap::new();
     vars.insert("db_engine".into(), "postgres-16".into());
     assert!(!evaluate_condition("db_engine == 'mysql-9.0'", &vars).unwrap());
+}
+
+#[test]
+fn test_not_equals_true() {
+    let mut vars = HashMap::new();
+    vars.insert("appengine_environment".into(), "standard".into());
+    assert!(evaluate_condition("appengine_environment != 'flexible'", &vars).unwrap());
 }
 
 #[test]

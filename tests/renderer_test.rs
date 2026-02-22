@@ -1,12 +1,14 @@
-use tforge::renderer::Renderer;
 use std::collections::HashMap;
+use tforge::renderer::Renderer;
 
 #[test]
 fn test_render_simple_variable() {
     let renderer = Renderer::new();
     let mut vars = HashMap::new();
     vars.insert("project_name".into(), "my-app".into());
-    let result = renderer.render_string("hello {{project_name}}", &vars).unwrap();
+    let result = renderer
+        .render_string("hello {{project_name}}", &vars)
+        .unwrap();
     assert_eq!(result, "hello my-app");
 }
 

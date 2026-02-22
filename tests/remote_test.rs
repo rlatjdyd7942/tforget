@@ -1,7 +1,7 @@
-use tforge::remote::{cache_dir, list_cached_templates_in, search_templates};
-use tforge::registry::Registry;
-use tempfile::TempDir;
 use std::fs;
+use tempfile::TempDir;
+use tforge::registry::Registry;
+use tforge::remote::{cache_dir, list_cached_templates_in, search_templates};
 
 #[test]
 fn test_cache_dir_path() {

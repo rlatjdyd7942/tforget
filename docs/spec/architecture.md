@@ -19,15 +19,15 @@ tforge new my-project
 ## Module Responsibilities
 
 - `cli.rs` — clap command definitions
-- `types.rs` — `TemplateManifest`, `StepDef`, `ParamDef` (serde-deserialized from TOML)
+- `types.rs` — `TemplateManifest`, `StepDef`, `ParamDef` (serde-deserialized from TOML, including parameter prompt conditions)
 - `registry.rs` — discovers templates from directories and embedded assets
 - `renderer.rs` — minijinja-based `{{variable}}` rendering in step commands
 - `resolver.rs` — topological sort of templates by `requires_templates`
-- `condition.rs` — evaluates step conditions (`services contains 'crashlytics'`, `db_engine == 'mysql-9.0'`)
+- `condition.rs` — evaluates condition expressions for step execution and parameter prompt visibility (`services contains 'crashlytics'`, `db_engine == 'mysql-9.0'`)
 - `executor.rs` — runs individual steps (`command`, `git`) with idempotency checks; `bundled` steps are accepted but currently execute as placeholders
 - `engine.rs` — orchestrates the full pipeline: resolve order → render variables → evaluate conditions → execute steps
 - `state.rs` — persists step completion to `.tforge-state.json` for `tforge resume`
-- `prompts.rs` — inquire-based interactive TUI
+- `prompts.rs` — inquire-based interactive TUI with deterministic parameter ordering and conditional prompt gating
 - `config.rs` — `~/.config/tforge/config.toml` management (LLM settings)
 - `llm/` — rig-core-based LLM invocation layer for Anthropic, OpenAI, Gemini, and Ollama in `--ai` mode
 - `embedded.rs` — rust-embed loader for bundled template manifests
@@ -36,7 +36,7 @@ tforge new my-project
 ## Data Flow (`tforge new`)
 
 1. Load registry (bundled + cached remote templates)
-2. Interactive prompts OR LLM parses natural language → `RecipeSelection` (templates + vars)
+2. Interactive prompts OR LLM parses natural language → `RecipeSelection` (templates + vars), including conditional parameter prompts (`when`)
 3. Expand dependency templates (`requires_templates`) and validate external tools
 4. Persist recipe and initial state (`tforge.toml`, `.tforge-state.json`)
 5. `resolver::resolve_order()` — topological sort
