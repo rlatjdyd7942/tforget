@@ -1,0 +1,22 @@
+[template]
+name = "gcp-appengine"
+description = "Google App Engine deployment configuration"
+category = "cloud"
+provider = "command"
+
+[dependencies]
+required_tools = ["gcloud"]
+requires_templates = ["gcp-project"]
+
+[parameters]
+runtime = { type = "select", prompt = "App Engine runtime", options = ["python312", "nodejs20", "go122", "java21"], default = "python312" }
+service = { type = "string", prompt = "Service name", default = "default" }
+
+[[steps]]
+type = "command"
+command = "gcloud app create --region={{region}} --project={{gcp_project_id}}"
+check = "gcloud app describe --project={{gcp_project_id}} 2>/dev/null"
+
+[[steps]]
+type = "command"
+command = "gcloud services enable appengine.googleapis.com --project={{gcp_project_id}}"

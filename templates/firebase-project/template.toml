@@ -1,0 +1,21 @@
+[template]
+name = "firebase-project"
+description = "Firebase project initialization"
+category = "cloud"
+provider = "command"
+
+[dependencies]
+required_tools = ["firebase"]
+requires_templates = ["gcp-project"]
+
+[parameters]
+firebase_services = { type = "multi-select", prompt = "Firebase services to enable", options = ["auth", "firestore", "storage", "hosting", "functions"], default = ["auth", "firestore"] }
+
+[[steps]]
+type = "command"
+command = "firebase projects:addfirebase {{gcp_project_id}}"
+check = "firebase projects:list 2>/dev/null | grep {{gcp_project_id}}"
+
+[[steps]]
+type = "command"
+command = "firebase init --project={{gcp_project_id}}"

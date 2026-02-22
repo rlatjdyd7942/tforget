@@ -1,0 +1,24 @@
+[template]
+name = "gcp-cloudsql"
+description = "Google Cloud SQL instance"
+category = "cloud"
+provider = "command"
+
+[dependencies]
+required_tools = ["gcloud"]
+requires_templates = ["gcp-project"]
+
+[parameters]
+db_engine = { type = "select", prompt = "Database engine", options = ["POSTGRES_16", "MYSQL_8_0"], default = "POSTGRES_16" }
+db_tier = { type = "select", prompt = "Instance tier", options = ["db-f1-micro", "db-g1-small", "db-custom-2-4096"], default = "db-f1-micro" }
+db_instance_name = { type = "string", prompt = "Instance name", default = "main-db" }
+
+[[steps]]
+type = "command"
+command = "gcloud sql instances create {{db_instance_name}} --database-version={{db_engine}} --tier={{db_tier}} --region={{region}} --project={{gcp_project_id}}"
+check = "gcloud sql instances describe {{db_instance_name}} --project={{gcp_project_id}} 2>/dev/null"
+
+[[steps]]
+type = "command"
+command = "gcloud sql databases create {{project_name}} --instance={{db_instance_name}} --project={{gcp_project_id}}"
+check = "gcloud sql databases describe {{project_name}} --instance={{db_instance_name}} --project={{gcp_project_id}} 2>/dev/null"

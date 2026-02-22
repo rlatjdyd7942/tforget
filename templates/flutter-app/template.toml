@@ -1,0 +1,22 @@
+[template]
+name = "flutter-app"
+description = "Flutter mobile application with standard project structure"
+category = "mobile"
+provider = "command"
+
+[dependencies]
+required_tools = ["flutter"]
+
+[parameters]
+org = { type = "string", prompt = "Organization name (reverse domain)", default = "com.example" }
+platforms = { type = "multi-select", prompt = "Target platforms", options = ["ios", "android", "web", "macos", "linux", "windows"], default = ["ios", "android"] }
+
+[[steps]]
+type = "command"
+command = "flutter create --org {{org}} --platforms {{platforms}} {{project_name}}"
+check = "test -f pubspec.yaml"
+
+[[steps]]
+type = "command"
+command = "flutter pub get"
+working_dir = "{{project_name}}"
