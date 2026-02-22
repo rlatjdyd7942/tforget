@@ -18,25 +18,33 @@ pub fn prompt_recipe(registry: &Registry, project_name: &str) -> Result<RecipeSe
     // Step 1: Select primary templates by category
     let categories = registry.categories();
     for category in &categories {
+        if category == "integration" {
+            continue;
+        }
+
         let templates = registry.by_category(category);
         if templates.is_empty() {
             continue;
         }
 
-        let names: Vec<String> = templates.iter().map(|t| {
-            format!("{} — {}", t.template.name, t.template.description)
-        }).collect();
+        let names: Vec<String> = templates
+            .iter()
+            .map(|t| format!("{} — {}", t.template.name, t.template.description))
+            .collect();
 
-        let selections = MultiSelect::new(
-            &format!("Select {category} templates:"),
-            names.clone(),
-        )
-        .prompt()
-        .context("template selection cancelled")?;
+        let selections = MultiSelect::new(&format!("Select {category} templates:"), names.clone())
+            .prompt()
+            .context("template selection cancelled")?;
 
         for selection in &selections {
             let idx = names.iter().position(|n| n == selection).unwrap();
-            selected_templates.push(templates[idx].clone().clone());
+            let template = templates[idx];
+            if selected_templates
+                .iter()
+                .all(|t| t.template.name != template.template.name)
+            {
+                selected_templates.push(template.clone());
+            }
         }
     }
 
@@ -64,7 +72,13 @@ pub fn prompt_recipe(registry: &Registry, project_name: &str) -> Result<RecipeSe
 
         for selection in &selections {
             let idx = names.iter().position(|n| n == selection).unwrap();
-            selected_templates.push(integration_templates[idx].clone().clone());
+            let template = integration_templates[idx];
+            if selected_templates
+                .iter()
+                .all(|t| t.template.name != template.template.name)
+            {
+                selected_templates.push(template.clone());
+            }
         }
     }
 

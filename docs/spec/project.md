@@ -1,22 +1,21 @@
-# tforge — Project Specification
+# tforge - Project Specification
 
-**tforge** is a Rust CLI tool that scaffolds multi-stack projects (Flutter, Axum, Next.js, etc.) with cloud infrastructure provisioning (GCP, Firebase, AWS) in a single command. Target: open-source developer community.
+**tforge** is a Rust CLI tool that scaffolds multi-stack projects (Flutter, Axum, etc.) with cloud infrastructure provisioning workflows (GCP/Firebase) in a single pipeline.
 
-Status: **pre-implementation**.
+Status: **implemented (v0.1)**.
 
 ## Core Concepts
 
-- **Template** — a TOML manifest (`template.toml`) + optional bundled files. Describes one component (e.g., "flutter-app", "axum-server", "gcp-project").
-- **Step** — an atomic action: run a command, copy files, clone a repo, execute a cloud CLI.
-- **Recipe** — a resolved combination of templates + user configuration values. What the user is actually building.
-- **Provider** — a template source: `bundled` (embedded in binary), `git` (cloned at runtime), `command` (delegates to existing CLIs like `flutter create`).
+- **Template** - A TOML manifest (`template.toml`) describing one component (for example `flutter-app`, `axum-server`, `gcp-project`).
+- **Step** - An atomic execution unit inside a template. Current runtime semantics are command execution and git clone execution, with optional condition/check gates.
+- **Recipe** - The resolved template set plus parameter values persisted to `tforge.toml`.
+- **Provider** - Template metadata (`bundled`, `git`, `command`). Bundled manifests are embedded in the binary; runtime step execution is driven by `[[steps]]`.
 
-## V1 Scope
+## V1 Implemented Scope
 
-Ship with:
-- CLI engine (pipeline, template resolution, dependency ordering)
-- Template system (all 3 providers, composability, conditions)
-- Bundled templates: flutter-app, axum-server, gcp-project, gcp-cloudsql, gcp-appengine, firebase-project, firebase-flutter
-- LLM integration (pluggable, optional, invoked through rig-core)
-- TUI interactive prompts
-- Resume/state tracking
+- CLI workflow: `new`, `list`, `search`, `add`, `update`, `resume`, `status`, `config`.
+- Template system: manifest parsing, dependency expansion (`requires_templates`), topological ordering, conditional/idempotent step execution.
+- Bundled manifest catalog: `flutter-app`, `axum-server`, `gcp-project`, `gcp-cloudsql`, `gcp-appengine`, `firebase-project`, `firebase-flutter`.
+- Optional LLM-assisted recipe selection via `tforge new <name> --ai "..."` using `rig-core`.
+- Inquire-based interactive prompts for non-LLM project setup.
+- Persistent execution state via `tforge.toml` and `.tforge-state.json`.

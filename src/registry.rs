@@ -7,6 +7,39 @@ pub struct Registry {
 }
 
 impl Registry {
+    /// Load templates from embedded assets (bundled in the binary).
+    pub fn from_embedded() -> Result<Self> {
+        let templates = crate::embedded::load_embedded_templates()?;
+        let mut registry = Self { templates };
+        registry
+            .templates
+            .sort_by(|a, b| a.template.name.cmp(&b.template.name));
+        Ok(registry)
+    }
+
+    /// Merge another registry into this one. Deduplicates by template name.
+    pub fn merge(&mut self, other: Registry) {
+        for t in other.templates {
+            if !self.templates.iter().any(|e| e.template.name == t.template.name) {
+                self.templates.push(t);
+            }
+        }
+        self.templates
+            .sort_by(|a, b| a.template.name.cmp(&b.template.name));
+    }
+
+    /// Load templates from the cache directory (~/.config/tforge/templates/).
+    pub fn from_cache_dir() -> Result<Self> {
+        let cache = crate::remote::cache_dir();
+        if cache.exists() {
+            Self::from_directory(&cache)
+        } else {
+            Ok(Self {
+                templates: Vec::new(),
+            })
+        }
+    }
+
     pub fn from_directory(path: &Path) -> Result<Self> {
         let mut templates = Vec::new();
 

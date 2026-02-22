@@ -71,6 +71,6 @@ pub fn execute_step(step: &StepDef, ctx: &StepContext) -> Result<StepResult> {
             }
             Ok(StepResult::Executed)
         }
-        other => bail!("unknown step type: {other}"),
+        other => bail!("unknown step type '{other}'. Valid types: command, bundled, git"),
     }
 }

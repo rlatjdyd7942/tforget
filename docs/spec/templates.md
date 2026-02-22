@@ -21,12 +21,8 @@ platforms = { type = "multi-select", prompt = "Target platforms", options = ["io
 
 [[steps]]
 type = "command"
-command = "flutter create --org {{org}} --platforms {{platforms|join(',')}} {{project_name}}"
-
-[[steps]]
-type = "bundled"
-action = "overlay"
-source = "files/"
+command = "flutter create --org {{org}} --platforms {{platforms}} {{project_name}}"
+check = "test -f pubspec.yaml"
 
 [[steps]]
 type = "command"
@@ -40,15 +36,30 @@ Key sections:
 - `[parameters]` — user-configurable values (string, multi-select, with defaults)
 - `[[steps]]` — ordered actions with optional `condition` and `check` fields
 
-## Providers
+### Parameter Types
 
-1. **Bundled** — static files embedded in the binary via rust-embed
-2. **Git** — template repos cloned at runtime
-3. **Command** — delegates to existing CLIs (flutter create, npx create-react-app, etc.)
+Supported parameter types:
+- `string`
+- `select`
+- `multi-select`
+- `bool`
+
+## Step Types
+
+1. **command** — executes a shell command (`sh -c ...`) with optional `working_dir`.
+2. **git** — clones `url` via `git clone --depth 1`.
+3. **bundled** — accepted by parser/executor for compatibility; currently treated as executed without file overlay/copy behavior.
 
 ### Dependency Handling
 
 CLI checks if required tools exist, prints install instructions if missing. Does not auto-install.
+
+## Provider Metadata
+
+`[template].provider` is template metadata (`bundled`, `git`, `command`) used for discovery/authoring context.
+
+- Bundled templates are embedded into the binary from `templates/**/template.toml`.
+- Runtime step execution behavior is determined by each `[[steps]].type`.
 
 ## Composability
 
@@ -95,20 +106,18 @@ Parameters set in one template (e.g., `gcp_project_id` in `gcp-project`) are aut
 
 ## Registry
 
-- **Bundled** — ship with binary (flutter-app, axum-server, gcp-project, firebase-flutter)
-- **Community** — central `registry.toml` on GitHub pointing to git repos
-- **Custom** — `tforge add <git-url>` to add any template
+- **Bundled** — template manifests shipped in the binary
+- **Local override** — `templates/` directory in the current repository/workspace
+- **Cached remote** — git repos cloned via `tforge add <git-url>`
 
 Templates cached at `~/.config/tforge/templates/`.
 
 ## Output Structure
 
-```
-my-app/
-├── tforge.toml          ← recipe manifest (reproducible)
-├── app/                 ← Flutter project
-├── server/              ← Axum project
-└── deploy/              ← deployment configs
-```
+Execution writes state files in the invocation directory:
 
-`tforge.toml` records all selections and parameters, enabling `tforge status` and `tforge rerun`.
+- `tforge.toml` — selected templates and parameter values.
+- `.tforge-state.json` — per-template/per-step completion and failure state.
+
+Generated project folders/files are defined by template commands (for example Flutter/Axum/GCP/Firebase CLI commands).
+`tforge status` and `tforge resume` read the two state files above.

@@ -1,11 +1,13 @@
 pub mod cli;
 pub mod condition;
 pub mod config;
+pub mod embedded;
 pub mod engine;
 pub mod executor;
 pub mod llm;
 pub mod prompts;
 pub mod registry;
+pub mod remote;
 pub mod renderer;
 pub mod resolver;
 pub mod state;
